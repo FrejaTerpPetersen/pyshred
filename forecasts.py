@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Out of sample forecasting with SHR
 
 parser.add_argument('--num_sensors', type=int, default=5, help='Number of sensors to use')
 
-parser.add_argument('--placement', type=str, default='random', help='Placement of sensors (random or QR)')
+parser.add_argument('--placement', type=str, default='QR', help='Placement of sensors (random or QR)')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 

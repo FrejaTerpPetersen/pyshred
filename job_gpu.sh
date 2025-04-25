@@ -1,7 +1,7 @@
 #!/bin/sh 
 ### General options 
 ### -- specify queue -- 
-#BSUB -q gpua100
+#BSUB -q gpuv100
 ### -- set the job Name -- 
 #BSUB -J forecasts
 ### -- ask for number of cores (default: 1) -- 
@@ -11,9 +11,9 @@
 ### -- specify that the cores must be on the same host -- 
 #BSUB -R "span[hosts=1]"
 ### -- specify that we need 4GB of memory per core/slot -- 
-#BSUB -R "rusage[mem=5GB]"
+#BSUB -R "rusage[mem=2GB]"
 ### -- specify that we want the job to get killed if it exceeds 5 GB per core/slot -- 
-#BSUB -M 5GB
+#BSUB -M 3GB
 ### -- set walltime limit: hh:mm -- 
 #BSUB -W 24:00 
 ### -- Specify the output and error file. %J is the job-id -- 
