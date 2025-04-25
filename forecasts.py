@@ -31,7 +31,7 @@ lags = args.lags
 num_sensors = args.num_sensors
 
 # load_X = load_data(args.dataset)
-ds = mikeio.read("Data/Area.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
 load_X = ds[0].to_numpy()
 load_X.shape
 n = load_X.shape[0]
@@ -61,6 +61,7 @@ for i in range(len(all_data_in)):
 
 ### Generate training validation and test datasets both for reconstruction of states and forecasting sensors
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print("Using cuda: ",torch.cuda.is_available(),'\n')
 
 train_data_in = torch.tensor(all_data_in[train_indices], dtype=torch.float32).to(device)
 valid_data_in = torch.tensor(all_data_in[valid_indices], dtype=torch.float32).to(device)
