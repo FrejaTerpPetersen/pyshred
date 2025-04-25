@@ -1,3 +1,11 @@
 Data/SST_data.mat filter=lfs diff=lfs merge=lfs -text
 ForecastingResults/truth.npy filter=lfs diff=lfs merge=lfs -text
 ForecastingResults/reconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ForecastingResults/recon_reconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ForecastingResults/forecast_reconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ForecastingResults/forecast_truth.npy filter=lfs diff=lfs merge=lfs -text
+ForecastingResults/recon_truth.npy filter=lfs diff=lfs merge=lfs -text
+recon_qrpodreconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ReconstructingResults/qrpodreconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ReconstructingResults/reconstructions.npy filter=lfs diff=lfs merge=lfs -text
+ReconstructingResults/truth.npy filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,143 @@
+Fri Apr 25 15:54:55 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.124.06             Driver Version: 570.124.06     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:D8:00.0 Off |                    0 |
+| N/A   30C    P0             25W /  250W |       1MiB /  32768MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+num_sensors changed to  3 to match sensor location file
+Training epoch 1
+Error tensor(0.2893, device='cuda:0')
+Training epoch 20
+Error tensor(0.0474, device='cuda:0')
+Training epoch 40
+Error tensor(0.0223, device='cuda:0')
+Training epoch 60
+Error tensor(0.0217, device='cuda:0')
+Training epoch 80
+Error tensor(0.0203, device='cuda:0')
+Training epoch 100
+Error tensor(0.0270, device='cuda:0')
+Training epoch 120
+Error tensor(0.0365, device='cuda:0')
+Training epoch 140
+Error tensor(0.0162, device='cuda:0')
+Training epoch 160
+Error tensor(0.0164, device='cuda:0')
+Training epoch 180
+Error tensor(0.0152, device='cuda:0')
+Training epoch 200
+Error tensor(0.0145, device='cuda:0')
+Training epoch 220
+Error tensor(0.0160, device='cuda:0')
+Training epoch 240
+Error tensor(0.0203, device='cuda:0')
+Training epoch 260
+Error tensor(0.0131, device='cuda:0')
+Training epoch 280
+Error tensor(0.0181, device='cuda:0')
+Training epoch 300
+Error tensor(0.0126, device='cuda:0')
+Training epoch 320
+Error tensor(0.0234, device='cuda:0')
+Training epoch 340
+Error tensor(0.0119, device='cuda:0')
+Training epoch 360
+Error tensor(0.0101, device='cuda:0')
+Training epoch 380
+Error tensor(0.0137, device='cuda:0')
+Training epoch 400
+Error tensor(0.0201, device='cuda:0')
+Training epoch 420
+Error tensor(0.0291, device='cuda:0')
+Training epoch 440
+Error tensor(0.0114, device='cuda:0')
+Training epoch 460
+Error tensor(0.0135, device='cuda:0')
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 24802481: <forecasts> in cluster <dcc> Done
+
+Job <forecasts> was submitted from host <n-62-30-1> by user <ftmp> in cluster <dcc> at Fri Apr 25 15:54:32 2025
+Job was executed on host(s) <4*n-62-11-14>, in queue <gpuv100>, as user <ftmp> in cluster <dcc> at Fri Apr 25 15:54:53 2025
+</zhome/cf/9/138047> was used as the home directory.
+</zhome/cf/9/138047/pyshred> was used as the working directory.
+Started at Fri Apr 25 15:54:53 2025
+Terminated at Fri Apr 25 15:55:30 2025
+Results reported at Fri Apr 25 15:55:30 2025
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh 
+### General options 
+### -- specify queue -- 
+#BSUB -q gpuv100
+### -- set the job Name -- 
+#BSUB -J forecasts
+### -- ask for number of cores (default: 1) -- 
+#BSUB -n 4
+### -- Select the resources: 1 gpu in exclusive process mode --
+#BSUB -gpu "num=1:mode=exclusive_process"
+### -- specify that the cores must be on the same host -- 
+#BSUB -R "span[hosts=1]"
+### -- specify that we need 4GB of memory per core/slot -- 
+#BSUB -R "rusage[mem=2GB]"
+### -- specify that we want the job to get killed if it exceeds 5 GB per core/slot -- 
+#BSUB -M 3GB
+### -- set walltime limit: hh:mm -- 
+#BSUB -W 24:00 
+### -- Specify the output and error file. %J is the job-id -- 
+### -- -o and -e mean append, -oo and -eo mean overwrite -- 
+#BSUB -o outputs_hpc/Output_%J.out 
+#BSUB -e outputs_hpc/Output_%J.err 
+
+
+nvidia-smi
+# Load the cuda module
+module load cuda/11.6
+
+source ../envs/envs/shred/bin/activate
+
+# here follow the commands you want to execute with input.in as the input file
+python -u reconstructions.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   31.48 sec.
+    Max Memory :                                 1077 MB
+    Average Memory :                             1077.00 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               7115.00 MB
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                9
+    Run time :                                   39 sec.
+    Turnaround time :                            58 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <outputs_hpc/Output_24802481.err> for stderr output of this job.
+
