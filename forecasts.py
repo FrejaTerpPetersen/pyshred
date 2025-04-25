@@ -6,15 +6,17 @@ from processdata import TimeSeriesDataset
 from processdata import qr_place
 from processdata import load_data
 from sklearn.preprocessing import MinMaxScaler
+import mikeio
 import os
 
+print("Loaded packages ... Let's start working...\n")
 parser = argparse.ArgumentParser(description='Out of sample forecasting with SHRED')
 
-parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reconstruction/forecasting')
+# parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reconstruction/forecasting')
 
-parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
+parser.add_argument('--num_sensors', type=int, default=5, help='Number of sensors to use')
 
-parser.add_argument('--placement', type=str, default='QR', help='Placement of sensors (random or QR)')
+parser.add_argument('--placement', type=str, default='random', help='Placement of sensors (random or QR)')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
@@ -28,7 +30,10 @@ args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
 
-load_X = load_data(args.dataset)
+# load_X = load_data(args.dataset)
+ds = mikeio.read("Data/Area.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+load_X = ds[0].to_numpy()
+load_X.shape
 n = load_X.shape[0]
 m = load_X.shape[1]
 
@@ -118,3 +123,4 @@ if not os.path.exists('ForecastingResults/' + args.dest):
 np.save('ForecastingResults/' + args.dest + '/reconstructions.npy', scaled_forecast)
 np.save('ForecastingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
 np.save('ForecastingResults/' + args.dest + '/truth.npy', truths)
+np.save('ForecastingResults/' + args.dest + '/sensor_locations.npy', sensor_locations)
