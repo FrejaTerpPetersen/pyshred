@@ -48,11 +48,11 @@ test_indices = np.arange(int(n*0.85) + args.val_length, n - lags)
 if args.placement == 'QR':
     sensor_locations, U_r = qr_place(load_X[train_indices].T, num_sensors)
 elif args.placement == 'file':
-    _, U_r = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.load(args.sensor_location_file)
     if len(sensor_locations) != num_sensors:
         print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
         num_sensors = len(sensor_locations)
+    _, U_r = qr_place(load_X[train_indices].T, num_sensors)
 else:
     _, U_r = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.random.choice(m, size=num_sensors, replace=False)

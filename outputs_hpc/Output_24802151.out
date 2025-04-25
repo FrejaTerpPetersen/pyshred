@@ -1,13 +1,13 @@
-Fri Apr 25 14:22:54 2025       
+Fri Apr 25 15:29:14 2025       
 +-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 570.124.06             Driver Version: 570.124.06     CUDA Version: 12.8     |
+| NVIDIA-SMI 570.133.20             Driver Version: 570.133.20     CUDA Version: 12.8     |
 |-----------------------------------------+------------------------+----------------------+
 | GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
 | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
-|   0  Tesla V100-PCIE-32GB           On  |   00000000:D8:00.0 Off |                    0 |
-| N/A   30C    P0             26W /  250W |       1MiB /  32768MiB |      0%   E. Process |
+|   0  Tesla V100-SXM2-32GB           On  |   00000000:3A:00.0 Off |                    0 |
+| N/A   36C    P0             69W /  300W |       0MiB /  32768MiB |      0%   E. Process |
 |                                         |                        |                  N/A |
 +-----------------------------------------+------------------------+----------------------+
                                                                                          
@@ -24,91 +24,91 @@ num_sensors changed to  3 to match sensor location file
 Using cuda:  True 
 
 Training epoch 1
-Error tensor(0.1170, device='cuda:0')
+Error tensor(0.1223, device='cuda:0')
 Training epoch 20
-Error tensor(0.0344, device='cuda:0')
+Error tensor(0.0313, device='cuda:0')
 Training epoch 40
-Error tensor(0.0217, device='cuda:0')
+Error tensor(0.0194, device='cuda:0')
 Training epoch 60
-Error tensor(0.0126, device='cuda:0')
+Error tensor(0.0124, device='cuda:0')
 Training epoch 80
-Error tensor(0.0143, device='cuda:0')
+Error tensor(0.0123, device='cuda:0')
 Training epoch 100
-Error tensor(0.0141, device='cuda:0')
+Error tensor(0.0086, device='cuda:0')
 Training epoch 120
-Error tensor(0.0069, device='cuda:0')
-Training epoch 140
-Error tensor(0.0127, device='cuda:0')
-Training epoch 160
-Error tensor(0.0088, device='cuda:0')
-Training epoch 180
-Error tensor(0.0089, device='cuda:0')
-Training epoch 200
-Error tensor(0.0053, device='cuda:0')
-Training epoch 220
-Error tensor(0.0070, device='cuda:0')
-Training epoch 240
-Error tensor(0.0182, device='cuda:0')
-Training epoch 260
-Error tensor(0.0107, device='cuda:0')
-Training epoch 280
-Error tensor(0.0131, device='cuda:0')
-Training epoch 300
-Error tensor(0.0130, device='cuda:0')
-Training epoch 1
-Error tensor(0.1851, device='cuda:0')
-Training epoch 20
-Error tensor(0.0175, device='cuda:0')
-Training epoch 40
-Error tensor(0.0136, device='cuda:0')
-Training epoch 60
-Error tensor(0.0134, device='cuda:0')
-Training epoch 80
-Error tensor(0.0129, device='cuda:0')
-Training epoch 100
-Error tensor(0.0079, device='cuda:0')
-Training epoch 120
-Error tensor(0.0104, device='cuda:0')
+Error tensor(0.0117, device='cuda:0')
 Training epoch 140
 Error tensor(0.0071, device='cuda:0')
 Training epoch 160
-Error tensor(0.0107, device='cuda:0')
+Error tensor(0.0100, device='cuda:0')
 Training epoch 180
-Error tensor(0.0072, device='cuda:0')
+Error tensor(0.0058, device='cuda:0')
 Training epoch 200
-Error tensor(0.0065, device='cuda:0')
+Error tensor(0.0064, device='cuda:0')
 Training epoch 220
-Error tensor(0.0052, device='cuda:0')
+Error tensor(0.0047, device='cuda:0')
 Training epoch 240
-Error tensor(0.0137, device='cuda:0')
+Error tensor(0.0114, device='cuda:0')
 Training epoch 260
-Error tensor(0.0069, device='cuda:0')
+Error tensor(0.0052, device='cuda:0')
 Training epoch 280
-Error tensor(0.0077, device='cuda:0')
+Error tensor(0.0058, device='cuda:0')
 Training epoch 300
-Error tensor(0.0046, device='cuda:0')
+Error tensor(0.0088, device='cuda:0')
 Training epoch 320
-Error tensor(0.0104, device='cuda:0')
+Error tensor(0.0068, device='cuda:0')
+Training epoch 1
+Error tensor(0.1672, device='cuda:0')
+Training epoch 20
+Error tensor(0.0171, device='cuda:0')
+Training epoch 40
+Error tensor(0.0137, device='cuda:0')
+Training epoch 60
+Error tensor(0.0121, device='cuda:0')
+Training epoch 80
+Error tensor(0.0077, device='cuda:0')
+Training epoch 100
+Error tensor(0.0112, device='cuda:0')
+Training epoch 120
+Error tensor(0.0096, device='cuda:0')
+Training epoch 140
+Error tensor(0.0145, device='cuda:0')
+Training epoch 160
+Error tensor(0.0071, device='cuda:0')
+Training epoch 180
+Error tensor(0.0078, device='cuda:0')
+Training epoch 200
+Error tensor(0.0077, device='cuda:0')
+Training epoch 220
+Error tensor(0.0066, device='cuda:0')
+Training epoch 240
+Error tensor(0.0065, device='cuda:0')
+Training epoch 260
+Error tensor(0.0156, device='cuda:0')
+Training epoch 280
+Error tensor(0.0054, device='cuda:0')
+Training epoch 300
+Error tensor(0.0069, device='cuda:0')
+Training epoch 320
+Error tensor(0.0120, device='cuda:0')
 Training epoch 340
-Error tensor(0.0061, device='cuda:0')
+Error tensor(0.0115, device='cuda:0')
 Training epoch 360
-Error tensor(0.0079, device='cuda:0')
+Error tensor(0.0058, device='cuda:0')
 Training epoch 380
-Error tensor(0.0085, device='cuda:0')
-Training epoch 400
-Error tensor(0.0105, device='cuda:0')
+Error tensor(0.0078, device='cuda:0')
 
 ------------------------------------------------------------
 Sender: LSF System <lsfadmin@hpc.dtu.dk>
-Subject: Job 24800819: <forecasts> in cluster <dcc> Exited
+Subject: Job 24802151: <forecasts> in cluster <dcc> Done
 
-Job <forecasts> was submitted from host <n-62-30-7> by user <ftmp> in cluster <dcc> at Fri Apr 25 14:18:45 2025
-Job was executed on host(s) <4*n-62-11-14>, in queue <gpuv100>, as user <ftmp> in cluster <dcc> at Fri Apr 25 14:22:51 2025
+Job <forecasts> was submitted from host <n-62-30-1> by user <ftmp> in cluster <dcc> at Fri Apr 25 15:26:50 2025
+Job was executed on host(s) <4*n-62-20-11>, in queue <gpuv100>, as user <ftmp> in cluster <dcc> at Fri Apr 25 15:29:12 2025
 </zhome/cf/9/138047> was used as the home directory.
 </zhome/cf/9/138047/pyshred> was used as the working directory.
-Started at Fri Apr 25 14:22:51 2025
-Terminated at Fri Apr 25 14:26:09 2025
-Results reported at Fri Apr 25 14:26:09 2025
+Started at Fri Apr 25 15:29:12 2025
+Terminated at Fri Apr 25 15:32:27 2025
+Results reported at Fri Apr 25 15:32:27 2025
 
 Your job looked like:
 
@@ -148,20 +148,20 @@ source ../envs/envs/shred/bin/activate
 python -u forecasts.py
 ------------------------------------------------------------
 
-Exited with exit code 1.
+Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   184.13 sec.
-    Max Memory :                                 1089 MB
-    Average Memory :                             959.25 MB
+    CPU time :                                   189.00 sec.
+    Max Memory :                                 1131 MB
+    Average Memory :                             1028.50 MB
     Total Requested Memory :                     8192.00 MB
-    Delta Memory :                               7103.00 MB
+    Delta Memory :                               7061.00 MB
     Max Swap :                                   -
     Max Processes :                              4
-    Max Threads :                                9
-    Run time :                                   198 sec.
-    Turnaround time :                            444 sec.
+    Max Threads :                                11
+    Run time :                                   197 sec.
+    Turnaround time :                            337 sec.
 
 The output (if any) is above this job summary.
 
@@ -169,5 +169,5 @@ The output (if any) is above this job summary.
 
 PS:
 
-Read file <outputs_hpc/Output_24800819.err> for stderr output of this job.
+Read file <outputs_hpc/Output_24802151.err> for stderr output of this job.
 

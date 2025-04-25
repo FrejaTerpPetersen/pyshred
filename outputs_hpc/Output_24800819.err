@@ -1,6 +1,0 @@
-Loaded module: cuda/11.6
-Traceback (most recent call last):
-  File "/zhome/cf/9/138047/pyshred/forecasts.py", line 126, in <module>
-    qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ scaled_forecasted_sensors[-len(scaled_forecast):].T).T
-                    ^^^
-NameError: name 'U_r' is not defined
