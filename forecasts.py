@@ -130,6 +130,6 @@ qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ scaled_forecasted_sensors[-len(sc
 if not os.path.exists('ForecastingResults/' + args.dest):
     os.makedirs('ForecastingResults/' + args.dest)
 np.save('ForecastingResults/' + args.dest + '/reconstructions.npy', scaled_forecast)
-np.save('ForecastingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
+# np.save('ForecastingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
 np.save('ForecastingResults/' + args.dest + '/truth.npy', truths)
 np.save('ForecastingResults/' + args.dest + '/sensor_locations.npy', sensor_locations)
