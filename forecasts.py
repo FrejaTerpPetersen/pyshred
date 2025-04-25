@@ -73,7 +73,7 @@ print("Using cuda: ",torch.cuda.is_available(),'\n')
 
 train_data_in = torch.tensor(all_data_in[train_indices], dtype=torch.float32).to(device)
 valid_data_in = torch.tensor(all_data_in[valid_indices], dtype=torch.float32).to(device)
-test_data_in = torch.tensor(all_data_in[test_indices], dtype=torch.float32).to(device)
+test_data_in = torch.tensor(all_data_in[test_indices], dtype=torch.float32).to(device) 
 
 ### -1 to have output be at the same time as final sensor measurements
 train_data_out = torch.tensor(transformed_X[train_indices + lags - 1], dtype=torch.float32).to(device)
