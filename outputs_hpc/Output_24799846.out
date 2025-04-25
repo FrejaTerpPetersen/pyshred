@@ -1,0 +1,160 @@
+Fri Apr 25 13:17:53 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.133.20             Driver Version: 570.133.20     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:D8:00.0 Off |                    0 |
+| N/A   30C    P0             24W /  250W |       0MiB /  32768MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Loaded packages ... Let's start working...
+
+Using cuda:  True 
+
+Training epoch 1
+Error tensor(0.2007, device='cuda:0')
+Training epoch 20
+Error tensor(0.0191, device='cuda:0')
+Training epoch 40
+Error tensor(0.0219, device='cuda:0')
+Training epoch 60
+Error tensor(0.0205, device='cuda:0')
+Training epoch 80
+Error tensor(0.0146, device='cuda:0')
+Training epoch 100
+Error tensor(0.0139, device='cuda:0')
+Training epoch 120
+Error tensor(0.0109, device='cuda:0')
+Training epoch 140
+Error tensor(0.0142, device='cuda:0')
+Training epoch 160
+Error tensor(0.0126, device='cuda:0')
+Training epoch 180
+Error tensor(0.0138, device='cuda:0')
+Training epoch 200
+Error tensor(0.0128, device='cuda:0')
+Training epoch 220
+Error tensor(0.0064, device='cuda:0')
+Training epoch 240
+Error tensor(0.0177, device='cuda:0')
+Training epoch 260
+Error tensor(0.0116, device='cuda:0')
+Training epoch 280
+Error tensor(0.0081, device='cuda:0')
+Training epoch 300
+Error tensor(0.0101, device='cuda:0')
+Training epoch 320
+Error tensor(0.0125, device='cuda:0')
+Training epoch 1
+Error tensor(0.1267, device='cuda:0')
+Training epoch 20
+Error tensor(0.0133, device='cuda:0')
+Training epoch 40
+Error tensor(0.0149, device='cuda:0')
+Training epoch 60
+Error tensor(0.0093, device='cuda:0')
+Training epoch 80
+Error tensor(0.0134, device='cuda:0')
+Training epoch 100
+Error tensor(0.0118, device='cuda:0')
+Training epoch 120
+Error tensor(0.0127, device='cuda:0')
+Training epoch 140
+Error tensor(0.0055, device='cuda:0')
+Training epoch 160
+Error tensor(0.0039, device='cuda:0')
+Training epoch 180
+Error tensor(0.0111, device='cuda:0')
+Training epoch 200
+Error tensor(0.0124, device='cuda:0')
+Training epoch 220
+Error tensor(0.0075, device='cuda:0')
+Training epoch 240
+Error tensor(0.0084, device='cuda:0')
+Training epoch 260
+Error tensor(0.0087, device='cuda:0')
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 24799846: <forecasts> in cluster <dcc> Done
+
+Job <forecasts> was submitted from host <n-62-27-20> by user <ftmp> in cluster <dcc> at Fri Apr 25 11:28:16 2025
+Job was executed on host(s) <4*n-62-20-13>, in queue <gpuv100>, as user <ftmp> in cluster <dcc> at Fri Apr 25 13:17:50 2025
+</zhome/cf/9/138047> was used as the home directory.
+</zhome/cf/9/138047/pyshred> was used as the working directory.
+Started at Fri Apr 25 13:17:50 2025
+Terminated at Fri Apr 25 13:20:59 2025
+Results reported at Fri Apr 25 13:20:59 2025
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh 
+### General options 
+### -- specify queue -- 
+#BSUB -q gpuv100
+### -- set the job Name -- 
+#BSUB -J forecasts
+### -- ask for number of cores (default: 1) -- 
+#BSUB -n 4
+### -- Select the resources: 1 gpu in exclusive process mode --
+#BSUB -gpu "num=1:mode=exclusive_process"
+### -- specify that the cores must be on the same host -- 
+#BSUB -R "span[hosts=1]"
+### -- specify that we need 4GB of memory per core/slot -- 
+#BSUB -R "rusage[mem=5GB]"
+### -- specify that we want the job to get killed if it exceeds 5 GB per core/slot -- 
+#BSUB -M 5GB
+### -- set walltime limit: hh:mm -- 
+#BSUB -W 24:00 
+### -- Specify the output and error file. %J is the job-id -- 
+### -- -o and -e mean append, -oo and -eo mean overwrite -- 
+#BSUB -o outputs_hpc/Output_%J.out 
+#BSUB -e outputs_hpc/Output_%J.err 
+
+
+nvidia-smi
+# Load the cuda module
+module load cuda/11.6
+
+source ../envs/envs/shred/bin/activate
+
+# here follow the commands you want to execute with input.in as the input file
+python -u forecasts.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   157.38 sec.
+    Max Memory :                                 1138 MB
+    Average Memory :                             844.00 MB
+    Total Requested Memory :                     20480.00 MB
+    Delta Memory :                               19342.00 MB
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                9
+    Run time :                                   189 sec.
+    Turnaround time :                            6763 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <outputs_hpc/Output_24799846.err> for stderr output of this job.
+
