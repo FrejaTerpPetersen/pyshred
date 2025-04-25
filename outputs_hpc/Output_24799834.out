@@ -1,0 +1,73 @@
+Loaded packages ... Let's start working...
+
+Using cuda:  False
+Training epoch 1
+Error tensor(0.1128)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 24799834: <forecasts> in cluster <dcc> Exited
+
+Job <forecasts> was submitted from host <n-62-27-20> by user <ftmp> in cluster <dcc> at Fri Apr 25 11:24:09 2025
+Job was executed on host(s) <n-62-31-3>, in queue <hpc>, as user <ftmp> in cluster <dcc> at Fri Apr 25 11:24:10 2025
+</zhome/cf/9/138047> was used as the home directory.
+</zhome/cf/9/138047/pyshred> was used as the working directory.
+Started at Fri Apr 25 11:24:10 2025
+Terminated at Fri Apr 25 11:25:06 2025
+Results reported at Fri Apr 25 11:25:06 2025
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh 
+### General options 
+### -- specify queue -- 
+#BSUB -q hpc
+### -- set the job Name -- 
+#BSUB -J forecasts
+### -- ask for number of cores (default: 1) -- 
+#BSUB -n 1
+### -- specify that the cores must be on the same host -- 
+#BSUB -R "span[hosts=1]"
+### -- specify that we need 4GB of memory per core/slot -- 
+#BSUB -R "rusage[mem=10GB]"
+### -- specify that we want the job to get killed if it exceeds 5 GB per core/slot -- 
+#BSUB -M 10GB
+### -- set walltime limit: hh:mm -- 
+#BSUB -W 24:00 
+### -- Specify the output and error file. %J is the job-id -- 
+### -- -o and -e mean append, -oo and -eo mean overwrite -- 
+#BSUB -o outputs_hpc/Output_%J.out 
+#BSUB -e outputs_hpc/Output_%J.err 
+
+source ../envs/envs/shred/bin/activate
+
+# here follow the commands you want to execute with input.in as the input file
+python forecasts.py
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 130.
+
+Resource usage summary:
+
+    CPU time :                                   51.52 sec.
+    Max Memory :                                 731 MB
+    Average Memory :                             487.67 MB
+    Total Requested Memory :                     10240.00 MB
+    Delta Memory :                               9509.00 MB
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                6
+    Run time :                                   130 sec.
+    Turnaround time :                            57 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <outputs_hpc/Output_24799834.err> for stderr output of this job.
+
