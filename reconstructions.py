@@ -7,6 +7,7 @@ from processdata import qr_place
 from processdata import load_data
 from sklearn.preprocessing import MinMaxScaler
 import os
+import mikeio
 
 parser = argparse.ArgumentParser(description='In sample reconstructing with SHRED')
 
@@ -14,7 +15,9 @@ parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reco
 
 parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
 
-parser.add_argument('--placement', type=str, default='QR', help='Placement of sensors (random or QR)')
+parser.add_argument('--placement', type=str, default='file', help='Placement of sensors (random, QR, or file)')
+
+parser.add_argument('--sensor_location_file', type=str, default='Data/sensor_locations.npy', help='.npy file with sensor locations')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
@@ -26,21 +29,38 @@ args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
 
-load_X = load_data(args.dataset)
+# load_X = load_data(args.dataset)
+ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+load_X = ds[0].to_numpy()
+load_X.shape
 n = load_X.shape[0]
 m = load_X.shape[1]
 
 ### Select indices for training, validation, and testing
-train_indices = np.random.choice(n - lags, size=1000, replace=False)
-mask = np.ones(n - lags)
-mask[train_indices] = 0
-valid_test_indices = np.arange(0, n - lags)[np.where(mask!=0)[0]]
-valid_indices = valid_test_indices[::2]
-test_indices = valid_test_indices[1::2]
+# train_indices = np.random.choice(n - lags, size=1000, replace=False)
+# mask = np.ones(n - lags)
+# mask[train_indices] = 0
+# valid_test_indices = np.arange(0, n - lags)[np.where(mask!=0)[0]]
+# valid_indices = valid_test_indices[::2]
+# test_indices = valid_test_indices[1::2]
+# FRTP:
+n_test = 174
+n_valid = 174
+n_train = 1000
+train_indices = np.arange(0, n_train)
+valid_indices = np.arange(n_train,n_train+n_valid)
+test_indices = np.arange(n_train+n_valid,n_train+n_valid+n_test)
+
 
 ### Set sensors randomly or according to QR
 if args.placement == 'QR':
     sensor_locations, U_r = qr_place(load_X[train_indices].T, num_sensors)
+elif args.placement == 'file':
+    sensor_locations = np.load(args.sensor_location_file)
+    if len(sensor_locations) != num_sensors:
+        print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
+        num_sensors = len(sensor_locations)
+    _, U_r = qr_place(load_X[train_indices].T, num_sensors)
 else:
     _, U_r = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.random.choice(m, size=num_sensors, replace=False)
@@ -81,12 +101,12 @@ shred = models.SHRED(num_sensors, m, hidden_size=64, hidden_layers=2, l1=350, l2
 validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
 
 ### Train SDN network for reconstruction
-sdn = models.SDN(num_sensors, m, l1=350, l2=400, dropout=0.0).to(device)
-validation_errors_sdn = models.fit(sdn, train_dataset_sdn, valid_dataset_sdn, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
+# sdn = models.SDN(num_sensors, m, l1=350, l2=400, dropout=0.0).to(device)
+# validation_errors_sdn = models.fit(sdn, train_dataset_sdn, valid_dataset_sdn, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
 
 ### Generate reconstructions from SHRED and SDN
 test_recons = sc.inverse_transform(shred(test_dataset.X).detach().cpu().numpy())
-test_recons_sdn = sc.inverse_transform(sdn(test_dataset_sdn.X).detach().cpu().numpy())
+# test_recons_sdn = sc.inverse_transform(sdn(test_dataset_sdn.X).detach().cpu().numpy())
 
 test_ground_truth = sc.inverse_transform(test_dataset.Y.detach().cpu().numpy())
 
@@ -102,6 +122,6 @@ qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
 if not os.path.exists('ReconstructingResults/' + args.dest):
     os.makedirs('ReconstructingResults/' + args.dest)
 np.save('ReconstructingResults/' + args.dest + '/reconstructions.npy', test_recons)
-np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
+# np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
 np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
