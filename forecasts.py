@@ -16,7 +16,9 @@ parser = argparse.ArgumentParser(description='Out of sample forecasting with SHR
 
 parser.add_argument('--num_sensors', type=int, default=5, help='Number of sensors to use')
 
-parser.add_argument('--placement', type=str, default='QR', help='Placement of sensors (random or QR)')
+parser.add_argument('--placement', type=str, default='file', help='Placement of sensors (random, QR, or file)')
+
+parser.add_argument('--sensor_location_file', type=str, default='Data/sensor_locations.npy', help='.npy file with sensor locations')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
@@ -45,6 +47,11 @@ test_indices = np.arange(int(n*0.85) + args.val_length, n - lags)
 ### Set sensors randomly or according to QR
 if args.placement == 'QR':
     sensor_locations, U_r = qr_place(load_X[train_indices].T, num_sensors)
+elif args.placement == 'file':
+    sensor_locations = np.load(args.sensor_location_file)
+    if len(sensor_locations) != num_sensors:
+        print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
+        num_sensors = len(sensor_locations)
 else:
     _, U_r = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.random.choice(m, size=num_sensors, replace=False)
