@@ -125,3 +125,4 @@ np.save('ReconstructingResults/' + args.dest + '/reconstructions.npy', test_reco
 # np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
 np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
+np.save('ReconstructingResults/' + args.dest + '/sensor_locations.npy', sensor_locations)
