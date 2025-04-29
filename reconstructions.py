@@ -11,7 +11,7 @@ import mikeio
 
 parser = argparse.ArgumentParser(description='In sample reconstructing with SHRED')
 
-parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reconstruction/forecasting')
+parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
 
 parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
 
@@ -30,6 +30,8 @@ parser.add_argument('--dest', type=str, default='', help='Destination folder')
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
+
+
 args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
@@ -38,6 +40,17 @@ num_sensors = args.num_sensors
 if args.dataset.lower() == 'oresund':
     ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
     load_X = ds[0].to_numpy()
+if args.dataset.lower() == 'oresund_forcing':
+    ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+    load_X = ds[0].to_numpy()
+    dsn = mikeio.read("Data/oresund/BCn.dfs1")
+    dss = mikeio.read("Data/oresund/BCs.dfs1")
+    # Concatenate boundary data
+    load_y = np.concatenate((dsn.to_numpy().squeeze(), dss.to_numpy().squeeze()[:,1:-1]), axis=1)
+
+    args.placement = "semirandom"
+    args.suffix = '_forcing' + args.suffix
+
 elif args.dataset.lower() == 'cylinder':
     load_X = np.loadtxt("Data/cylinder/VORTALL.csv", delimiter=',').T
 
@@ -68,6 +81,11 @@ elif args.placement == 'file':
         print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
         num_sensors = len(sensor_locations)
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
+elif args.placement == 'semirandom':
+    locn = np.random.choice(np.arange(0,13), size=int(np.floor(num_sensors/2)), replace=False)
+    locs = np.random.choice(np.arange(13,(13+29)), size=int(np.ceil(num_sensors/2)), replace=False)
+    sensor_locations = np.concatenate((locn, locs), axis=0)
+    _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 else:
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.random.choice(m, size=num_sensors, replace=False)
@@ -77,10 +95,21 @@ sc = MinMaxScaler()
 sc = sc.fit(load_X[train_indices])
 transformed_X = sc.transform(load_X)
 
+if args.dataset.lower() == 'oresund_forcing':
+    # Transform the forcing data
+    sc_y = MinMaxScaler()
+    sc_y = sc_y.fit(load_y[train_indices])
+    transformed_y = sc_y.transform(load_y)
+
 ### Generate input sequences to a SHRED model
 all_data_in = np.zeros((n - lags, lags, num_sensors))
+
 for i in range(len(all_data_in)):
-    all_data_in[i] = transformed_X[i:i+lags, sensor_locations]
+    if args.dataset.lower() == 'oresund_forcing':
+        # Use the forcing data as sensor input
+        all_data_in[i] = transformed_y[i:i+lags, sensor_locations]
+    else:
+        all_data_in[i] = transformed_X[i:i+lags, sensor_locations]
 
 ### Generate training validation and test datasets both for reconstruction of states and forecasting sensors
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
