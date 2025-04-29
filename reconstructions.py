@@ -21,36 +21,42 @@ parser.add_argument('--sensor_location_file', type=str, default='Data/sensor_loc
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
+parser.add_argument('--val_length', type=int, default=20, help='Length of validation set (Training set of 0.85*N, test set remainder)')
+
 parser.add_argument('--lags', type=int, default=52, help='Length of sensor trajectories used')
 
 parser.add_argument('--dest', type=str, default='', help='Destination folder')
+
+parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
 args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
 
 # load_X = load_data(args.dataset)
-ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
-load_X = ds[0].to_numpy()
-load_X.shape
+if args.dataset.lower() == 'oresund':
+    ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+    load_X = ds[0].to_numpy()
+elif args.dataset.lower() == 'cylinder':
+    load_X = np.loadtxt("Data/cylinder/VORTALL.csv", delimiter=',').T
+
 n = load_X.shape[0]
 m = load_X.shape[1]
 
-### Select indices for training, validation, and testing
-# train_indices = np.random.choice(n - lags, size=1000, replace=False)
-# mask = np.ones(n - lags)
-# mask[train_indices] = 0
-# valid_test_indices = np.arange(0, n - lags)[np.where(mask!=0)[0]]
-# valid_indices = valid_test_indices[::2]
-# test_indices = valid_test_indices[1::2]
 # FRTP:
-n_test = 174
-n_valid = 174
-n_train = 1000
-train_indices = np.arange(0, n_train)
-valid_indices = np.arange(n_train,n_train+n_valid)
-test_indices = np.arange(n_train+n_valid,n_train+n_valid+n_test)
+# n_test = 174
+# n_valid = 174
+# n_train = 1000
+# train_indices = np.arange(0, n_train)
+# valid_indices = np.arange(n_train,n_train+n_valid)
+# test_indices = np.arange(n_train+n_valid,n_train+n_valid+n_test)
+train_indices = np.arange(0, int(n*0.85))
+valid_indices = np.arange(int(n*0.85), int(n*0.85) + args.val_length)
+test_indices = np.arange(int(n*0.85) + args.val_length, n - lags)
 
+print("Train set size:", len(train_indices))
+print("Val set size:", len(valid_indices))
+print("Test set size:", len(test_indices))
 
 ### Set sensors randomly or according to QR
 if args.placement == 'QR':
@@ -121,8 +127,8 @@ qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
 ### Plot and save error
 if not os.path.exists('ReconstructingResults/' + args.dest):
     os.makedirs('ReconstructingResults/' + args.dest)
-np.save('ReconstructingResults/' + args.dest + '/reconstructions.npy', test_recons)
+np.save('ReconstructingResults/' + args.dest + '/reconstructions'+args.suffix+'.npy', test_recons)
 # np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
-np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions.npy', qrpod_recons)
+np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
-np.save('ReconstructingResults/' + args.dest + '/sensor_locations.npy', sensor_locations)
+np.save('ReconstructingResults/' + args.dest + '/sensor_locations'+args.suffix+'.npy', sensor_locations)
