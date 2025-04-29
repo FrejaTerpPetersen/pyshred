@@ -18,3 +18,4 @@ ReconstructingResults/cylinder/qrpodreconstructions_sensor10lag10.npy filter=lfs
 ReconstructingResults/cylinder/reconstructions_sensor10.npy filter=lfs diff=lfs merge=lfs -text
 ReconstructingResults/cylinder/reconstructions_sensor10lag10.npy filter=lfs diff=lfs merge=lfs -text
 ReconstructingResults/cylinder/sensor_locations_sensor10.npy filter=lfs diff=lfs merge=lfs -text
+Data/ReconstructingResults/oresund_forcing/* filter=lfs diff=lfs merge=lfs -text

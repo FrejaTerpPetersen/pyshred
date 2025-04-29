@@ -30,6 +30,7 @@ parser.add_argument('--dest', type=str, default='', help='Destination folder')
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
+# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
 
 
 args = parser.parse_args()
@@ -83,8 +84,9 @@ elif args.placement == 'file':
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 elif args.placement == 'semirandom':
     locn = np.random.choice(np.arange(0,13), size=int(np.floor(num_sensors/2)), replace=False)
-    locs = np.random.choice(np.arange(13,(13+29)), size=int(np.ceil(num_sensors/2)), replace=False)
+    locs = np.random.choice(np.arange(13,(13+27)), size=int(np.ceil(num_sensors/2)), replace=False)
     sensor_locations = np.concatenate((locn, locs), axis=0)
+    print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 else:
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
@@ -113,6 +115,7 @@ for i in range(len(all_data_in)):
 
 ### Generate training validation and test datasets both for reconstruction of states and forecasting sensors
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print("Using cuda: ",torch.cuda.is_available(),'\n')
 
 train_data_in = torch.tensor(all_data_in[train_indices], dtype=torch.float32).to(device)
 valid_data_in = torch.tensor(all_data_in[valid_indices], dtype=torch.float32).to(device)
