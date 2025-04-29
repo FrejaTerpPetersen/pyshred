@@ -29,6 +29,7 @@ parser.add_argument('--dest', type=str, default='', help='Destination folder')
 
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
 args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
@@ -56,19 +57,19 @@ test_indices = np.arange(int(n*0.85) + args.val_length, n - lags)
 
 print("Train set size:", len(train_indices))
 print("Val set size:", len(valid_indices))
-print("Test set size:", len(test_indices))
+print("Test set size:", len(test_indices),'\n')
 
 ### Set sensors randomly or according to QR
 if args.placement == 'QR':
-    sensor_locations, U_r = qr_place(load_X[train_indices].T, num_sensors)
+    sensor_locations, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 elif args.placement == 'file':
     sensor_locations = np.load(args.sensor_location_file)
     if len(sensor_locations) != num_sensors:
         print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
         num_sensors = len(sensor_locations)
-    _, U_r = qr_place(load_X[train_indices].T, num_sensors)
+    _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 else:
-    _, U_r = qr_place(load_X[train_indices].T, num_sensors)
+    _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
     sensor_locations = np.random.choice(m, size=num_sensors, replace=False)
 
 ### Fit min max scaler to training data, and then scale all data
@@ -132,3 +133,4 @@ np.save('ReconstructingResults/' + args.dest + '/reconstructions'+args.suffix+'.
 np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
 np.save('ReconstructingResults/' + args.dest + '/sensor_locations'+args.suffix+'.npy', sensor_locations)
+np.save('ReconstructingResults/' + args.dest + '/singularvals'+args.suffix+'.npy', Sigma)

@@ -42,5 +42,5 @@ def qr_place(data_matrix, num_sensors):
     rankapprox = u[:, :num_sensors]
     q, r, pivot = scipy.linalg.qr(rankapprox.T, pivoting=True)
     sensor_locs = pivot[:num_sensors]
-    return sensor_locs, rankapprox
+    return sensor_locs, rankapprox, s
 
