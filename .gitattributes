@@ -9,3 +9,4 @@ recon_qrpodreconstructions.npy filter=lfs diff=lfs merge=lfs -text
 ReconstructingResults/qrpodreconstructions.npy filter=lfs diff=lfs merge=lfs -text
 ReconstructingResults/reconstructions.npy filter=lfs diff=lfs merge=lfs -text
 ReconstructingResults/truth.npy filter=lfs diff=lfs merge=lfs -text
+Data/cylinder/VORTALL.csv filter=lfs diff=lfs merge=lfs -text
