@@ -89,8 +89,8 @@ elif args.placement == 'semirandom':
     print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 elif args.placement == 'distributed':
-    locn = np.round(np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1])
-    locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1])
+    locn = np.round(np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1]).astype(int)
+    locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1]).astype(int)
     sensor_locations = np.concatenate((locn, locs), axis=0)
     print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
