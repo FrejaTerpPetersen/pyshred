@@ -24,3 +24,4 @@ ReconstrucingResults/* filter=lfs diff=lfs merge=lfs -text
 ReconstrucingResults/oresund_forcing_U filter=lfs diff=lfs merge=lfs -text
 ReconstrucingResults/oresund_forcing_U/* filter=lfs diff=lfs merge=lfs -text
 ReconstrucingResults/oresund_forcing_V/* filter=lfs diff=lfs merge=lfs -text
+ReconstructingResults/oresund_forcing_V/qrpodreconstructions_forcing_sensor6lag52_1y.npy filter=lfs diff=lfs merge=lfs -text
