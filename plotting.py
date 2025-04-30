@@ -704,7 +704,7 @@ def plot_abs_err_quantiles(ds_pred,ds_true,fig_path,fig_name_prefix="",config=No
         cur_ax.set_ylabel(f"Absolute error  [{err_units[v]}]")
         cur_ax.grid()
         if v == 0:
-            cur_ax.legend(["Quantile 0.01", "Quantile 0.5", "Quantile 0.99"])
+            cur_ax.legend(["Quantile " + str(i) for i in q])
         else:
             cur_ax.get_legend().set_visible(False)
     plt.tight_layout()
