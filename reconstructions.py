@@ -110,7 +110,10 @@ sc = MinMaxScaler()
 sc = sc.fit(load_X[train_indices])
 
 transformed_X = sc.transform(load_X)
+
 # Save scaler for later
+if not os.path.exists('ReconstructingResults/' + args.dest):
+    os.makedirs('ReconstructingResults/' + args.dest)
 scalerfile = 'ReconstructingResults/' + args.dest + '/scaler' + args.suffix + '.sav'
 pickle.dump(sc, open(scalerfile, 'wb'))
 
@@ -179,8 +182,7 @@ for i in range(num_sensors):
 qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
 
 ### Plot and save error
-if not os.path.exists('ReconstructingResults/' + args.dest):
-    os.makedirs('ReconstructingResults/' + args.dest)
+
 np.save('ReconstructingResults/' + args.dest + '/reconstructions'+args.suffix+'.npy', test_recons)
 # np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
 np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
