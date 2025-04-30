@@ -4,7 +4,7 @@ import numpy as np
 import models
 from processdata import TimeSeriesDataset
 from processdata import qr_place
-from processdata import load_data
+
 from sklearn.preprocessing import MinMaxScaler
 import os
 import mikeio
@@ -89,8 +89,8 @@ elif args.placement == 'semirandom':
     print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 elif args.placement == 'distributed':
-    locn = np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1].astype(int)
-    locs = np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1].astype(int)
+    locn = np.round(np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1])
+    locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1])
     sensor_locations = np.concatenate((locn, locs), axis=0)
     print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
