@@ -38,8 +38,7 @@ parser.add_argument('--suffix', type=str, default='', help='Suffix for the outpu
 
 # U and V components
 # python ./reconstructions.py --dataset 'oresund_forcing' --item 1 --num_sensors 6 --dest 'oresund_forcing_U' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
-
-# python ./reconstructions.py --dataset 'oresund_forcing' --item 1 --num_sensors 6 --dest 'oresund_forcing_U' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
+# python ./reconstructions.py --dataset 'oresund_forcing' --item 2 --num_sensors 6 --dest 'oresund_forcing_V' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
 
 
 args = parser.parse_args()
