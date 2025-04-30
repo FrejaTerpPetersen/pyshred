@@ -49,8 +49,8 @@ class SHRED(torch.nn.Module):
         torch.save(self.state_dict(), path)
     
     # A method for loading the weights of the SHRED model
-    def load_weights(self, path):
-        self.load_state_dict(torch.load(path))
+    def load_weights(self, path,device='cpu'):
+        self.load_state_dict(torch.load(path,map_location=torch.device(device)))
         self.eval()
 
 
