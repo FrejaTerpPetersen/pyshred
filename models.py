@@ -21,8 +21,6 @@ class SHRED(torch.nn.Module):
         self.hidden_layers = hidden_layers
         self.hidden_size = hidden_size
 
-        
-
     def forward(self, x):
         
         h_0 = torch.zeros((self.hidden_layers, x.size(0), self.hidden_size), dtype=torch.float)
@@ -45,6 +43,15 @@ class SHRED(torch.nn.Module):
         output = self.linear3(output)
 
         return output
+    
+    # A method for saving the weights of the SHRED model
+    def save_weights(self, path):
+        torch.save(self.state_dict(), path)
+    
+    # A method for loading the weights of the SHRED model
+    def load_weights(self, path):
+        self.load_state_dict(torch.load(path))
+        self.eval()
 
 
 class SDN(torch.nn.Module):

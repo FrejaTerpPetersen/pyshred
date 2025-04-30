@@ -49,7 +49,7 @@ if args.dataset.lower() == 'oresund_forcing':
     # Concatenate boundary data
     load_y = np.concatenate((dsn.to_numpy().squeeze(), dss.to_numpy().squeeze()[:,1:-1]), axis=1)
 
-    args.placement = "semirandom"
+    args.placement = "distributed"
     args.suffix = '_forcing' + args.suffix
 
 elif args.dataset.lower() == 'cylinder':
@@ -85,6 +85,12 @@ elif args.placement == 'file':
 elif args.placement == 'semirandom':
     locn = np.random.choice(np.arange(0,13), size=int(np.floor(num_sensors/2)), replace=False)
     locs = np.random.choice(np.arange(13,(13+27)), size=int(np.ceil(num_sensors/2)), replace=False)
+    sensor_locations = np.concatenate((locn, locs), axis=0)
+    print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
+    _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
+elif args.placement == 'distributed':
+    locn = np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1].astype(int)
+    locs = np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1].astype(int)
     sensor_locations = np.concatenate((locn, locs), axis=0)
     print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
@@ -166,3 +172,8 @@ np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suff
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
 np.save('ReconstructingResults/' + args.dest + '/sensor_locations'+args.suffix+'.npy', sensor_locations)
 np.save('ReconstructingResults/' + args.dest + '/singularvals'+args.suffix+'.npy', Sigma)
+
+# Save model weights
+if not os.path.exists('models/' + args.dest):
+    os.makedirs('models/' + args.dest)
+shred.save_weights('models/' + args.dest + '/shred_reconstruction'+args.suffix+'.pt')
