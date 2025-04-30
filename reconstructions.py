@@ -14,6 +14,8 @@ parser = argparse.ArgumentParser(description='In sample reconstructing with SHRE
 
 parser.add_argument('--dataset', type=str, default='oresund', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
 
+parser.add_argument('--item', type=int, default=0, help='Which item to use in the dfsu file. 0 for surface elevation, 1,2 for velocity components')
+
 parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
 
 parser.add_argument('--placement', type=str, default='file', help='Placement of sensors (random, QR, or file)')
@@ -41,15 +43,15 @@ num_sensors = args.num_sensors
 
 # load_X = load_data(args.dataset)
 if args.dataset.lower() == 'oresund':
-    ds = mikeio.read("Data/Area_5m.dfsu", items=[0])
+    ds = mikeio.read("Data/Area_5m.dfsu", items=[args.item])
     load_X = ds[0].to_numpy()
 
 elif args.dataset.lower() == 'oresund_forcing':
     # ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
-    ds = mikeio.read("Data/Area_1y.dfsu", items=[0])
+    ds = mikeio.read("Data/Area_1y.dfsu", items=[args.item])
     load_X = ds[0].to_numpy()
-    dsn = mikeio.read("Data/oresund/BCn_1y.dfs1")
-    dss = mikeio.read("Data/oresund/BCs_1y.dfs1")
+    dsn = mikeio.read("Data/oresund/BCn_1y.dfs1", items=[args.item])
+    dss = mikeio.read("Data/oresund/BCs_1y.dfs1", items=[args.item])
     # Concatenate boundary data
     load_y = np.concatenate((dsn.to_numpy().squeeze(), dss.to_numpy().squeeze()[:,1:-1]), axis=1)
 
