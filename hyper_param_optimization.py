@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import models
 from processdata import TimeSeriesDataset
-
+import optuna
 import pickle
 
 from sklearn.preprocessing import MinMaxScaler
@@ -113,39 +113,37 @@ train_dataset_sdn = TimeSeriesDataset(train_data_in[:,-1,:], train_data_out)
 valid_dataset_sdn = TimeSeriesDataset(valid_data_in[:,-1,:], valid_data_out)
 test_dataset_sdn = TimeSeriesDataset(test_data_in[:,-1,:], test_data_out)
 
+# Set up objective function for hyperparameter optimization
+def objective(trial):
+    hidden_size = trial.suggest_int('hidden_size', 1,512)
+    hidden_layers = trial.suggest_int('hidden_layers', 1, 5)
+    l1 = trial.suggest_int('l1', hidden_size, 512)
+    l2 = trial.suggest_int('l2', l1, 512)
+    dropout = trial.suggest_float('dropout', 0.0, 0.5)
+    batch_size = trial.suggest_int('batch_size', 16, 128)
+    lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
 
-### Train SHRED network for reconstruction
-shred = models.SHRED(num_sensors, m, hidden_size=64, hidden_layers=2, l1=350, l2=400, dropout=0.0).to(device)
-validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
 
-### Train SDN network for reconstruction
-# sdn = models.SDN(num_sensors, m, l1=350, l2=400, dropout=0.0).to(device)
-# validation_errors_sdn = models.fit(sdn, train_dataset_sdn, valid_dataset_sdn, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
+    ### Initialize and train SHRED network for reconstruction
+    shred = models.SHRED(num_sensors, m, hidden_size=hidden_size, hidden_layers=hidden_layers, l1=l1, l2=l2, dropout=dropout).to(device)
+    validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=batch_size, num_epochs=args.epochs, lr=lr, verbose=True, patience=5)
+    return validation_errors[-1]
 
-### Generate reconstructions from SHRED and SDN
-test_recons = sc.inverse_transform(shred(test_dataset.X).detach().cpu().numpy())
-# test_recons_sdn = sc.inverse_transform(sdn(test_dataset_sdn.X).detach().cpu().numpy())
+# Run optuna optimization
+n_trials = 100
+study = optuna.create_study(direction="minimize")
+study.optimize(lambda trial: objective(trial), n_trials=n_trials)
 
-test_ground_truth = sc.inverse_transform(test_dataset.Y.detach().cpu().numpy())
+pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
+complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+print("Study statistics: ")
+print("  Number of finished trials: ", len(study.trials))
+print("  Number of pruned trials: ", len(pruned_trials))
+print("  Number of complete trials: ", len(complete_trials))
 
-### Generate reconstructions from QR/POD
-qrpod_sensors = load_X[test_indices][:, sensor_locations]
-C = np.zeros((num_sensors, m))
-for i in range(num_sensors):
-    C[i, sensor_locations[i]] = 1
-
-qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
-
-### Plot and save error
-
-np.save('ReconstructingResults/' + args.dest + '/reconstructions'+args.suffix+'.npy', test_recons)
-# np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
-np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
-np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
-np.save('ReconstructingResults/' + args.dest + '/sensor_locations'+args.suffix+'.npy', sensor_locations)
-np.save('ReconstructingResults/' + args.dest + '/singularvals'+args.suffix+'.npy', Sigma)
-
-# Save model weights
-if not os.path.exists('models/' + args.dest):
-    os.makedirs('models/' + args.dest)
-shred.save_weights('models/' + args.dest + '/shred_reconstruction'+args.suffix+'.pt')
+print("Best trial:")
+best_trial = study.best_trial
+print("  Value: ", best_trial.value)
+print("  Params: ")
+for key, value in best_trial.params.items():
+    print("    {}: {}".format(key, value))
