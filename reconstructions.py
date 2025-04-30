@@ -32,6 +32,7 @@ parser.add_argument('--suffix', type=str, default='', help='Suffix for the outpu
 
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
 # python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
+# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
 
 
 args = parser.parse_args()
@@ -40,9 +41,10 @@ num_sensors = args.num_sensors
 
 # load_X = load_data(args.dataset)
 if args.dataset.lower() == 'oresund':
-    ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+    ds = mikeio.read("Data/Area_5m.dfsu", items=[0])
     load_X = ds[0].to_numpy()
-if args.dataset.lower() == 'oresund_forcing':
+
+elif args.dataset.lower() == 'oresund_forcing':
     # ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
     ds = mikeio.read("Data/Area_1y.dfsu", items=[0])
     load_X = ds[0].to_numpy()
@@ -94,7 +96,7 @@ elif args.placement == 'distributed':
     locn = np.round(np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1]).astype(int)
     locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1]).astype(int)
     sensor_locations = np.concatenate((locn, locs), axis=0)
-    print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
+    print(f"Picked {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
 else:
     _, U_r, Sigma = qr_place(load_X[train_indices].T, num_sensors)
