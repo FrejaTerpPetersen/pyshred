@@ -4,6 +4,7 @@ import numpy as np
 import models
 from processdata import TimeSeriesDataset
 from processdata import qr_place
+import pickle
 
 from sklearn.preprocessing import MinMaxScaler
 import os
@@ -11,7 +12,7 @@ import mikeio
 
 parser = argparse.ArgumentParser(description='In sample reconstructing with SHRED')
 
-parser.add_argument('--dataset', type=str, default='SST', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
+parser.add_argument('--dataset', type=str, default='oresund', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
 
 parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
 
@@ -101,13 +102,21 @@ else:
 ### Fit min max scaler to training data, and then scale all data
 sc = MinMaxScaler()
 sc = sc.fit(load_X[train_indices])
+
 transformed_X = sc.transform(load_X)
+# Save scaler for later
+scalerfile = 'ReconstructingResults/' + args.dest + '/scaler' + args.suffix + '.sav'
+pickle.dump(sc, open(scalerfile, 'wb'))
 
 if args.dataset.lower() == 'oresund_forcing':
     # Transform the forcing data
     sc_y = MinMaxScaler()
     sc_y = sc_y.fit(load_y[train_indices])
     transformed_y = sc_y.transform(load_y)
+
+    # Save scaler for later
+    scalerfile = 'ReconstructingResults/' + args.dest + '/scaler_y' + args.suffix + '.sav'
+    pickle.dump(sc_y, open(scalerfile, 'wb'))
 
 ### Generate input sequences to a SHRED model
 all_data_in = np.zeros((n - lags, lags, num_sensors))
