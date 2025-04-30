@@ -43,10 +43,11 @@ if args.dataset.lower() == 'oresund':
     ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
     load_X = ds[0].to_numpy()
 if args.dataset.lower() == 'oresund_forcing':
-    ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+    # ds = mikeio.read("Data/Area_5m.dfsu",time=slice("2022-01-01", "2022-12-31"), items=[0])
+    ds = mikeio.read("Data/Area_1y.dfsu", items=[0])
     load_X = ds[0].to_numpy()
-    dsn = mikeio.read("Data/oresund/BCn.dfs1")
-    dss = mikeio.read("Data/oresund/BCs.dfs1")
+    dsn = mikeio.read("Data/oresund/BCn_1y.dfs1")
+    dss = mikeio.read("Data/oresund/BCs_1y.dfs1")
     # Concatenate boundary data
     load_y = np.concatenate((dsn.to_numpy().squeeze(), dss.to_numpy().squeeze()[:,1:-1]), axis=1)
 
