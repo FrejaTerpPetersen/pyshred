@@ -32,23 +32,17 @@ parser.add_argument('--dest', type=str, default='', help='Destination folder')
 
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
-# python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
-# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
-# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
-
-# U and V components
-# python ./reconstructions.py --dataset 'oresund_forcing' --item 1 --num_sensors 6 --dest 'oresund_forcing_U' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
-# python ./reconstructions.py --dataset 'oresund_forcing' --item 2 --num_sensors 6 --dest 'oresund_forcing_V' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
-
+# python ./hyper_param_optimization.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 50 --lags 52 --suffix '_sensor6lag52'
 
 args = parser.parse_args()
 lags = args.lags
 num_sensors = args.num_sensors
 
 
-load_X, load_y = load_data(args)
+load_X, load_y = load_data(args,suff='_5m')
 
 n = load_X.shape[0]
+n=1000
 m = load_X.shape[1]
 
 train_indices, valid_indices, test_indices = train_val_test_split(n,lags,args.val_length)
@@ -58,7 +52,7 @@ print("Val set size:", len(valid_indices))
 print("Test set size:", len(test_indices),'\n')
 
 # Pick sensor locations according to args.placement
-sensor_locations, U_r, Sigma = pick_sensor_locations(args, num_sensors)
+sensor_locations, U_r, Sigma = pick_sensor_locations(args, num_sensors, load_X[train_indices])
 
 ### Fit min max scaler to training data, and then scale all data
 sc = MinMaxScaler()
@@ -66,21 +60,11 @@ sc = sc.fit(load_X[train_indices])
 
 transformed_X = sc.transform(load_X)
 
-# Save scaler for later
-if not os.path.exists('ReconstructingResults/' + args.dest):
-    os.makedirs('ReconstructingResults/' + args.dest)
-scalerfile = 'ReconstructingResults/' + args.dest + '/scaler' + args.suffix + '.sav'
-pickle.dump(sc, open(scalerfile, 'wb'))
-
 if args.dataset.lower() == 'oresund_forcing':
     # Transform the forcing data
     sc_y = MinMaxScaler()
     sc_y = sc_y.fit(load_y[train_indices])
     transformed_y = sc_y.transform(load_y)
-
-    # Save scaler for later
-    scalerfile = 'ReconstructingResults/' + args.dest + '/scaler_y' + args.suffix + '.sav'
-    pickle.dump(sc_y, open(scalerfile, 'wb'))
 
 ### Generate input sequences to a SHRED model
 all_data_in = np.zeros((n - lags, lags, num_sensors))
@@ -126,13 +110,14 @@ def objective(trial):
 
     ### Initialize and train SHRED network for reconstruction
     shred = models.SHRED(num_sensors, m, hidden_size=hidden_size, hidden_layers=hidden_layers, l1=l1, l2=l2, dropout=dropout).to(device)
-    validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=batch_size, num_epochs=args.epochs, lr=lr, verbose=True, patience=5)
+    validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=batch_size, num_epochs=args.epochs, lr=lr, verbose=False, patience=5)
     return validation_errors[-1]
 
 # Run optuna optimization
 n_trials = 100
 study = optuna.create_study(direction="minimize")
-study.optimize(lambda trial: objective(trial), n_trials=n_trials)
+study.optimize(lambda trial: objective(trial), n_trials=n_trials,show_progress_bar=True)
+
 
 pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
 complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
@@ -147,3 +132,19 @@ print("  Value: ", best_trial.value)
 print("  Params: ")
 for key, value in best_trial.params.items():
     print("    {}: {}".format(key, value))
+
+
+# Save the study to a file
+if not os.path.exists('OptimizationResults/' + args.dest):
+    os.makedirs('OptimizationResults/' + args.dest)
+study_file = 'OptimizationResults/' + args.dest + '/study' + args.suffix + '.pkl'
+with open(study_file, 'wb') as f:
+    pickle.dump(study, f)
+
+
+
+# [I 2025-05-01 07:31:50,309] A new study created in memory with name: no-name-d1ac7c48-1d34-489e-8427-7fff3ec5b861
+# [I 2025-05-01 07:32:10,517] Trial 0 finished with value: 0.041407134383916855 and parameters: {'hidden_size': 110, 'hidden_layers': 4, 'l1': 443, 'l2': 454, 'dropout': 0.06143151450618162, 'batch_size': 118, 'lr': 0.001468929664914147}. Best is trial 0 with value: 0.041407134383916855.
+# [I 2025-05-01 08:22:06,109] Trial 26 finished with value: 0.04098373278975487 and parameters: {'hidden_size': 165, 'hidden_layers': 4, 'l1': 398, 'l2': 440, 'dropout': 0.45689126560393367, 'batch_size': 64, 'lr': 0.0004277318196117026}. Best is trial 26 with value: 0.04098373278975487.
+# [I 2025-05-01 09:10:35,768] Trial 45 finished with value: 0.040382497012615204 and parameters: {'hidden_size': 510, 'hidden_layers': 4, 'l1': 511, 'l2': 512, 'dropout': 0.16897504886959003, 'batch_size': 22, 'lr': 2.236801178651685e-05}. Best is trial 45 with value: 0.040382497012615204.
+# [I 2025-05-01 09:45:17,199] Trial 51 finished with value: 0.033993110060691833 and parameters: {'hidden_size': 394, 'hidden_layers': 4, 'l1': 475, 'l2': 507, 'dropout': 0.11024013780206343, 'batch_size': 16, 'lr': 4.494511243120062e-05}. Best is trial 51 with value: 0.033993110060691833.
