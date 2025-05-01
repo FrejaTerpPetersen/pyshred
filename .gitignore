@@ -16,3 +16,7 @@ Data/oresund/BCn_1y.dfs1
 Data/oresund/BCs_1y.dfs1
 Data/oresund/BC_UV_North_2D_2014-2024.dfs1
 Data/oresund/BC_UV_South_2D_2014-2024.dfs1
+
+models/cylinder/*
+models/cylinder
+models/cylinder/shred_reconstruction_sensor10lag10.pt

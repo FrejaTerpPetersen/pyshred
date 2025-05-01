@@ -33,6 +33,25 @@ parser.add_argument('--dest', type=str, default='', help='Destination folder')
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
 
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 1 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor1lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 2 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor2lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 3 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor3lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 4 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor4lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 5 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor5lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 6 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor6lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 7 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor7lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 8 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor8lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 9 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor9lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 15 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor15lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 20 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor20lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 30 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor30lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 40 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor40lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 50 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor50lag10'
+# python ./reconstructions.py --dataset 'cylinder' --num_sensors 75 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor75lag10'
+
+
+
 # python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
 # python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
 
@@ -58,7 +77,7 @@ print("Val set size:", len(valid_indices))
 print("Test set size:", len(test_indices),'\n')
 
 # Pick sensor locations according to args.placement
-sensor_locations, U_r, Sigma = pick_sensor_locations(args, num_sensors)
+sensor_locations, U_r, Sigma = pick_sensor_locations(args, num_sensors,X=load_X[train_indices])
 
 ### Fit min max scaler to training data, and then scale all data
 sc = MinMaxScaler()
