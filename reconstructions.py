@@ -12,25 +12,29 @@ from help_funcs import load_data, train_val_test_split, pick_sensor_locations
 
 parser = argparse.ArgumentParser(description='In sample reconstructing with SHRED')
 
-parser.add_argument('--dataset', type=str, default='oresund', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
+parser.add_argument('--dataset', type=str, default='cylinder', help='Dataset for reconstruction/forecasting. Choose between "cylinder" or "oresund" or "oresund_forcing"')
 
 parser.add_argument('--item', type=int, default=0, help='Which item to use in the dfsu file. 0 for surface elevation, 1,2 for velocity components')
 
-parser.add_argument('--num_sensors', type=int, default=10, help='Number of sensors to use')
+parser.add_argument('--num_sensors', type=int, default=3, help='Number of sensors to use')
 
-parser.add_argument('--placement', type=str, default='file', help='Placement of sensors (random, QR, or file)')
+parser.add_argument('--placement', type=str, default='random', help='Placement of sensors (random, QR, or file)')
 
 parser.add_argument('--sensor_location_file', type=str, default='Data/sensor_locations.npy', help='.npy file with sensor locations')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
-parser.add_argument('--val_length', type=int, default=20, help='Length of validation set (Training set of 0.85*N, test set remainder)')
+parser.add_argument('--val_length', type=int, default=5, help='Length of validation set (Training set of 0.85*N, test set remainder)')
 
-parser.add_argument('--lags', type=int, default=52, help='Length of sensor trajectories used')
+parser.add_argument('--lags', type=int, default=10, help='Length of sensor trajectories used')
 
 parser.add_argument('--dest', type=str, default='', help='Destination folder')
 
 parser.add_argument('--suffix', type=str, default='', help='Suffix for the output files')
+
+
+
+# python ./reconstructions.py --dataset 'oresund' --num_sensors 3 --val_length 500 --lags 52 --placement 'file'
 
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 10 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor10lag10'
 # python ./reconstructions.py --dataset 'cylinder' --num_sensors 1 --placement 'qr' --dest 'cylinder' --val_length 5 --lags 10 --suffix '_sensor1lag10'

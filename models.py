@@ -31,6 +31,7 @@ class SHRED(torch.nn.Module):
 
         _, (h_out, _) = self.lstm(x, (h_0, c_0))
         h_out = h_out[-1].view(-1, self.hidden_size)
+        self.h_out = h_out
 
         output = self.linear1(h_out)
         output = self.dropout(output)
