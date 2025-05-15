@@ -1,5 +1,6 @@
 import mikeio
 import numpy as np
+import pandas as pd
 from processdata import qr_place
 
 
@@ -18,9 +19,58 @@ def load_data(args,suff = '_1y'):
         dss = mikeio.read(f"Data/oresund/BCs{suff}.dfs1", items=[args.item])
         # Concatenate boundary data
         load_y = np.concatenate((dsn.to_numpy().squeeze(), dss.to_numpy().squeeze()[:,1:-1]), axis=1)
+        
+        
 
-        args.placement = "distributed"
-        args.suffix = '_forcing' + args.suffix
+        if args.num_sensors>0:
+            fldr = "Data/oresund/obs/"
+            stations = ["Drogden","Klagshamn","Barseback","Dragor","Flinten7","Helsingborg","Hornbaek",
+                    "Kobenhavn","MalmoHamn","Skanor","Vedbaek"]
+            files = [f + "_wl.csv" for f in stations]
+            # locs = pd.read_csv(fldr + "stations.csv", delimiter=',', header=0,index_col=0)
+            obs = []
+            # coords = []
+            for i,f in enumerate(files[:args.num_sensors]):
+                try:
+                    data = pd.read_csv(fldr + f, delimiter=',', header=0,index_col=0)
+                    data.index = pd.to_datetime(data.index)
+                    # use dsn.time to subset data
+
+                    data = data.loc[dsn.time[0]:dsn.time[-1]]
+                    # for the indices that are in dsn.time but not in data, set to NaN
+                    data = data.reindex(dsn.time)
+
+         
+                    # Fill nan values with the last valid observation
+                    obs.append(data.ffill().values)
+
+                    # # Find the closest point in the ds geometry to the station location
+                    # closest_point = ds.sel(x=locs.iloc[i,0],y=locs.iloc[i,1]).geometry
+                    # # Get the index of that point in the ds geometry
+                    # coords.append(np.where((ds.geometry.element_coordinates[:,:2] == np.array([closest_point.x,closest_point.y]))[:,0])[0].item())
+
+
+                except:
+                    print(f"File {f} not found")
+
+
+            # Save indices of the sensors according to load_y
+            sensor_locations = np.arange(0,args.num_sensors) + load_y.shape[1]
+            np.save(fldr + "sensor_locations_load_y.npy", sensor_locations)
+            args.sensor_location_file = fldr + "sensor_locations_load_y.npy"
+            args.placement = 'file'
+
+
+            load_y = np.concatenate((load_y,np.concatenate(obs,axis=1)), axis=1)
+
+            # coordinates = np.array(coords)
+            # np.save(fldr + "coordinates.npy", coordinates)
+            # args.sensor_location_file = fldr + "coordinates.npy"
+            
+
+            args.suffix = '_forcing_obs' + args.suffix
+        else:
+            args.suffix = '_forcing' + args.suffix
 
     elif args.dataset.lower() == 'cylinder':
         load_X = np.loadtxt("Data/cylinder/VORTALL.csv", delimiter=',').T
@@ -48,21 +98,29 @@ def pick_sensor_locations(args, num_sensors,X):
         if len(sensor_locations) != num_sensors:
             print("num_sensors changed to ", len(sensor_locations), "to match sensor location file")
             num_sensors = len(sensor_locations)
-        _, U_r, Sigma = qr_place(X.T, num_sensors)
+        if args.num_forcings == 0:
+            _, U_r, Sigma = qr_place(X.T, num_sensors)
+        else:
+            U_r = None; Sigma = None
     elif args.placement == 'semirandom':
         locn = np.random.choice(np.arange(0,13), size=int(np.floor(num_sensors/2)), replace=False)
         locs = np.random.choice(np.arange(13,(13+27)), size=int(np.ceil(num_sensors/2)), replace=False)
         sensor_locations = np.concatenate((locn, locs), axis=0)
         print(f"Sampled {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
         _, U_r, Sigma = qr_place(X.T, num_sensors)
-    elif args.placement == 'distributed':
-        locn = np.round(np.linspace(0,13,int(np.floor(num_sensors/2)) + 2)[1:-1]).astype(int)
-        locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_sensors/2)) + 2)[1:-1]).astype(int)
-        sensor_locations = np.concatenate((locn, locs), axis=0)
-        print(f"Picked {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
-        _, U_r, Sigma = qr_place(X.T, num_sensors)
     else:
         _, U_r, Sigma = qr_place(X.T, num_sensors)
         sensor_locations = np.random.choice(m, size=num_sensors, replace=False)
 
     return sensor_locations, U_r, Sigma
+
+
+def pick_forcing_locations(args, num_forcings,num_sensors,X):
+
+    locn = np.round(np.linspace(0,13,int(np.floor(num_forcings/2)) + 2)[1:-1]).astype(int)
+    locs = np.round(np.linspace(13,(13+27),int(np.ceil(num_forcings/2)) + 2)[1:-1]).astype(int)
+    forcing_locations = np.concatenate((locn, locs), axis=0)
+    print(f"Picked {len(locn)} sensor locations on North boundary and {len(locs)} sensor locations on South boundary")
+    _, U_r, Sigma = qr_place(X.T, num_forcings + num_sensors)
+
+    return forcing_locations, U_r, Sigma

@@ -8,7 +8,7 @@ import pickle
 
 from sklearn.preprocessing import MinMaxScaler
 import os
-from help_funcs import load_data, train_val_test_split, pick_sensor_locations
+from help_funcs import load_data, train_val_test_split, pick_sensor_locations, pick_forcing_locations
 
 parser = argparse.ArgumentParser(description='In sample reconstructing with SHRED')
 
@@ -21,6 +21,8 @@ parser.add_argument('--num_sensors', type=int, default=3, help='Number of sensor
 parser.add_argument('--placement', type=str, default='random', help='Placement of sensors (random, QR, or file)')
 
 parser.add_argument('--sensor_location_file', type=str, default='Data/sensor_locations.npy', help='.npy file with sensor locations')
+
+parser.add_argument('--num_forcings', type=int, default=0, help='Number of forcings to use')
 
 parser.add_argument('--epochs', type=int, default=1000, help='Maximum number of epochs')
 
@@ -56,20 +58,37 @@ parser.add_argument('--suffix', type=str, default='', help='Suffix for the outpu
 
 
 
-# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
-# python ./reconstructions.py --dataset 'oresund_forcing' --num_sensors 6 --dest 'oresund_forcing' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
+# python ./reconstructions.py --dataset 'oresund_forcing' --num_forcings 6 --num_sensors 0 --dest 'oresund_forcing' --val_length 20 --lags 52 --suffix '_sensor6lag52'
+# python ./reconstructions.py --dataset 'oresund_forcing' --num_forcings 6 --num_sensors 0 --dest 'oresund_forcing' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
 
 # U and V components
-# python ./reconstructions.py --dataset 'oresund_forcing' --item 1 --num_sensors 6 --dest 'oresund_forcing_U' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
-# python ./reconstructions.py --dataset 'oresund_forcing' --item 2 --num_sensors 6 --dest 'oresund_forcing_V' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
+# python ./reconstructions.py --dataset 'oresund_forcing' --item 1 --num_forcings 6 --num_sensors 0 --dest 'oresund_forcing_U' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
+# python ./reconstructions.py --dataset 'oresund_forcing' --item 2 --num_forcings 6 --num_sensors 0 --dest 'oresund_forcing_V' --val_length 500 --lags 52 --suffix '_sensor6lag52_1y'
+
+
+# With observational data
+# python ./reconstructions.py --dataset 'oresund_forcing' --item 0 --num_forcings 6 --num_sensors 11 --dest 'oresund_forcing_obs' --val_length 500 --lags 52 --suffix '_forcing6_obs11_lag52_1y'
 
 
 args = parser.parse_args()
-lags = args.lags
-num_sensors = args.num_sensors
+
+# Hack; delete this again
+# args.dataset = 'oresund_forcing'
+# args.item = 0
+# args.num_sensors = 11
+# args.num_forcings = 6
+# args.dest = 'oresund_forcing_obs'
+# args.val_length = 500
+# args.lags = 10
+# args.suffix = '_forcing6_obs11_lag10_1y'
 
 
 load_X, load_y = load_data(args)
+
+
+lags = args.lags
+num_sensors = args.num_sensors
+num_forcings = args.num_forcings
 
 n = load_X.shape[0]
 m = load_X.shape[1]
@@ -82,6 +101,10 @@ print("Test set size:", len(test_indices),'\n')
 
 # Pick sensor locations according to args.placement
 sensor_locations, U_r, Sigma = pick_sensor_locations(args, num_sensors,X=load_X[train_indices])
+
+if num_forcings > 0:
+    forcing_locations, U_r, Sigma = pick_forcing_locations(args, num_forcings,num_sensors,X=load_X[train_indices])
+    sensor_locations = np.concatenate((sensor_locations, forcing_locations), axis=0)
 
 ### Fit min max scaler to training data, and then scale all data
 sc = MinMaxScaler()
@@ -106,7 +129,7 @@ if args.dataset.lower() == 'oresund_forcing':
     pickle.dump(sc_y, open(scalerfile, 'wb'))
 
 ### Generate input sequences to a SHRED model
-all_data_in = np.zeros((n - lags, lags, num_sensors))
+all_data_in = np.zeros((n - lags, lags, num_sensors+num_forcings))
 
 for i in range(len(all_data_in)):
     if args.dataset.lower() == 'oresund_forcing':
@@ -138,7 +161,7 @@ test_dataset_sdn = TimeSeriesDataset(test_data_in[:,-1,:], test_data_out)
 
 
 ### Train SHRED network for reconstruction
-shred = models.SHRED(num_sensors, m, hidden_size=64, hidden_layers=2, l1=350, l2=400, dropout=0.0).to(device)
+shred = models.SHRED(num_sensors+num_forcings, m, hidden_size=64, hidden_layers=2, l1=350, l2=400, dropout=0.0).to(device)
 validation_errors = models.fit(shred, train_dataset, valid_dataset, batch_size=64, num_epochs=args.epochs, lr=1e-3, verbose=True, patience=5)
 
 ### Train SDN network for reconstruction
@@ -152,18 +175,19 @@ test_recons = sc.inverse_transform(shred(test_dataset.X).detach().cpu().numpy())
 test_ground_truth = sc.inverse_transform(test_dataset.Y.detach().cpu().numpy())
 
 ### Generate reconstructions from QR/POD
-qrpod_sensors = load_X[test_indices][:, sensor_locations]
-C = np.zeros((num_sensors, m))
-for i in range(num_sensors):
-    C[i, sensor_locations[i]] = 1
+if num_forcings == 0:
+    qrpod_sensors = load_X[test_indices][:, sensor_locations]
+    C = np.zeros((num_sensors+num_forcings, m))
+    for i in range(num_sensors+num_forcings):
+        C[i, sensor_locations[i]] = 1
 
-qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
+    qrpod_recons = (U_r @ np.linalg.inv(C @ U_r) @ qrpod_sensors.T).T
 
 ### Plot and save error
 
 np.save('ReconstructingResults/' + args.dest + '/reconstructions'+args.suffix+'.npy', test_recons)
 # np.save('ReconstructingResults/' + args.dest + '/sdnreconstructions.npy', test_recons_sdn)
-np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
+if num_forcings == 0: np.save('ReconstructingResults/' + args.dest + '/qrpodreconstructions'+args.suffix+'.npy', qrpod_recons)
 np.save('ReconstructingResults/' + args.dest + '/truth.npy', test_ground_truth)
 np.save('ReconstructingResults/' + args.dest + '/sensor_locations'+args.suffix+'.npy', sensor_locations)
 np.save('ReconstructingResults/' + args.dest + '/singularvals'+args.suffix+'.npy', Sigma)
