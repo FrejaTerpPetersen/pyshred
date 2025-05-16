@@ -73,14 +73,14 @@ parser.add_argument('--suffix', type=str, default='', help='Suffix for the outpu
 args = parser.parse_args()
 
 # Hack; delete this again
-# args.dataset = 'oresund_forcing'
-# args.item = 0
-# args.num_sensors = 11
-# args.num_forcings = 6
-# args.dest = 'oresund_forcing_obs'
-# args.val_length = 500
-# args.lags = 10
-# args.suffix = '_forcing6_obs11_lag10_1y'
+args.dataset = 'oresund_forcing'
+args.item = 0
+args.num_sensors = 11
+args.num_forcings = 6
+args.dest = 'oresund_forcing_obs'
+args.val_length = 500
+args.lags = 52
+args.suffix = '_forcing6_obs11_lag52_1y'
 
 
 load_X, load_y = load_data(args)

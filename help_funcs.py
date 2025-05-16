@@ -3,6 +3,36 @@ import numpy as np
 import pandas as pd
 from processdata import qr_place
 
+def load_obs(num_sensors,times,ds=None,fldr = "Data/oresund/obs/"):
+    stations = ["Drogden","Klagshamn","Barseback","Dragor","Flinten7","Helsingborg","Hornbaek",
+            "Kobenhavn","MalmoHamn","Skanor","Vedbaek"]
+    files = [f + "_wl.csv" for f in stations]
+    locs = pd.read_csv(fldr + "stations.csv", delimiter=',', header=0,index_col=0)
+    obs = []
+    coords = []
+    for i,f in enumerate(files[:num_sensors]):
+        try:
+            data = pd.read_csv(fldr + f, delimiter=',', header=0,index_col=0)
+            data.index = pd.to_datetime(data.index)
+            # use dsn.time to subset data
+
+            data = data.loc[times[0]:times[-1]]
+            # for the indices that are in dsn.time but not in data, set to NaN
+            data = data.reindex(times)
+
+    
+            # Fill nan values with the last valid observation
+            obs.append(data.ffill().values)
+
+            # # Find the closest point in the ds geometry to the station location
+            if ds is not None:
+                closest_point = ds.sel(x=locs.iloc[i,0],y=locs.iloc[i,1]).geometry
+                # Get the index of that point in the ds geometry
+                coords.append(np.array([closest_point.x,closest_point.y]).reshape(1,-1))
+        except:
+            print(f"File {f} not found")
+
+    return np.concatenate(obs,axis=1), coords
 
 def load_data(args,suff = '_1y'):
     # load_X = load_data(args.dataset)
@@ -23,35 +53,40 @@ def load_data(args,suff = '_1y'):
         
 
         if args.num_sensors>0:
+            
             fldr = "Data/oresund/obs/"
-            stations = ["Drogden","Klagshamn","Barseback","Dragor","Flinten7","Helsingborg","Hornbaek",
-                    "Kobenhavn","MalmoHamn","Skanor","Vedbaek"]
-            files = [f + "_wl.csv" for f in stations]
-            # locs = pd.read_csv(fldr + "stations.csv", delimiter=',', header=0,index_col=0)
-            obs = []
-            # coords = []
-            for i,f in enumerate(files[:args.num_sensors]):
-                try:
-                    data = pd.read_csv(fldr + f, delimiter=',', header=0,index_col=0)
-                    data.index = pd.to_datetime(data.index)
-                    # use dsn.time to subset data
+            obs, coords = load_obs(args.num_sensors,times=dsn.time,ds=ds,fldr=fldr)
 
-                    data = data.loc[dsn.time[0]:dsn.time[-1]]
-                    # for the indices that are in dsn.time but not in data, set to NaN
-                    data = data.reindex(dsn.time)
+
+            # 
+            # stations = ["Drogden","Klagshamn","Barseback","Dragor","Flinten7","Helsingborg","Hornbaek",
+            #         "Kobenhavn","MalmoHamn","Skanor","Vedbaek"]
+            # files = [f + "_wl.csv" for f in stations]
+            # locs = pd.read_csv(fldr + "stations.csv", delimiter=',', header=0,index_col=0)
+            # obs = []
+            # coords = []
+            # for i,f in enumerate(files[:args.num_sensors]):
+            #     try:
+            #         data = pd.read_csv(fldr + f, delimiter=',', header=0,index_col=0)
+            #         data.index = pd.to_datetime(data.index)
+            #         # use dsn.time to subset data
+
+            #         data = data.loc[dsn.time[0]:dsn.time[-1]]
+            #         # for the indices that are in dsn.time but not in data, set to NaN
+            #         data = data.reindex(dsn.time)
 
          
-                    # Fill nan values with the last valid observation
-                    obs.append(data.ffill().values)
+            #         # Fill nan values with the last valid observation
+            #         obs.append(data.ffill().values)
 
-                    # # Find the closest point in the ds geometry to the station location
-                    # closest_point = ds.sel(x=locs.iloc[i,0],y=locs.iloc[i,1]).geometry
-                    # # Get the index of that point in the ds geometry
-                    # coords.append(np.where((ds.geometry.element_coordinates[:,:2] == np.array([closest_point.x,closest_point.y]))[:,0])[0].item())
+            #         # # Find the closest point in the ds geometry to the station location
+            #         closest_point = ds.sel(x=locs.iloc[i,0],y=locs.iloc[i,1]).geometry
+            #         # Get the index of that point in the ds geometry
+            #         coords.append(np.array([closest_point.x,closest_point.y]).reshape(1,-1))
 
 
-                except:
-                    print(f"File {f} not found")
+            #     except:
+            #         print(f"File {f} not found")
 
 
             # Save indices of the sensors according to load_y
@@ -61,10 +96,10 @@ def load_data(args,suff = '_1y'):
             args.placement = 'file'
 
 
-            load_y = np.concatenate((load_y,np.concatenate(obs,axis=1)), axis=1)
+            load_y = np.concatenate((load_y,obs), axis=1)
 
-            # coordinates = np.array(coords)
-            # np.save(fldr + "coordinates.npy", coordinates)
+            coordinates = np.concatenate(coords,axis=0)
+            np.save(fldr + 'coordinates'+args.suffix+'.npy', coordinates)
             # args.sensor_location_file = fldr + "coordinates.npy"
             
 
